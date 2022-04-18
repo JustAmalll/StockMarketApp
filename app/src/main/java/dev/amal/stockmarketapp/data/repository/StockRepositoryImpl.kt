@@ -1,7 +1,9 @@
 package dev.amal.stockmarketapp.data.repository
 
+import dev.amal.stockmarketapp.data.csv.CSVParser
 import dev.amal.stockmarketapp.data.local.StockDatabase
 import dev.amal.stockmarketapp.data.mapper.toCompanyListing
+import dev.amal.stockmarketapp.data.mapper.toCompanyListingEntity
 import dev.amal.stockmarketapp.data.remote.StockApi
 import dev.amal.stockmarketapp.domain.model.CompanyListing
 import dev.amal.stockmarketapp.domain.repository.StockRepository
@@ -16,7 +18,8 @@ import javax.inject.Singleton
 @Singleton
 class StockRepositoryImpl @Inject constructor(
     val api: StockApi,
-    val db: StockDatabase
+    val db: StockDatabase,
+    val companyListingsParser: CSVParser<CompanyListing>
 ) : StockRepository {
 
     private val dao = db.dao
@@ -41,12 +44,28 @@ class StockRepositoryImpl @Inject constructor(
 
             val remoteListings = try {
                 val response = api.getListings()
+                companyListingsParser.parse(response.byteStream())
             } catch (e: IOException) {
                 e.printStackTrace()
                 emit(Resource.Error("Couldn't load data"))
+                null
             } catch (e: HttpException) {
                 e.printStackTrace()
                 emit(Resource.Error("Couldn't load data"))
+                null
+            }
+
+            remoteListings?.let { listings ->
+                dao.clearCompanyListings()
+                dao.insertCompanyListings(
+                    listings.map { it.toCompanyListingEntity() }
+                )
+                emit(Resource.Success(
+                    data = dao
+                        .searchCompanyListing("")
+                        .map { it.toCompanyListing() }
+                ))
+                emit(Resource.Loading(false))
             }
         }
     }
