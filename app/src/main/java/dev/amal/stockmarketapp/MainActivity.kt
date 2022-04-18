@@ -6,13 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.ramcosta.composedestinations.DestinationsNavHost
 import dagger.hilt.android.AndroidEntryPoint
-import dev.amal.stockmarketapp.presentation.company_listings.NavGraphs
+import dev.amal.stockmarketapp.presentation.NavGraphs
 import dev.amal.stockmarketapp.ui.theme.StockMarketAppTheme
 
 @AndroidEntryPoint
